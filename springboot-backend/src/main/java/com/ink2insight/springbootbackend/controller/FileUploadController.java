@@ -15,7 +15,12 @@ public class FileUploadController {
 
     @PostMapping("/upload")
     public ResponseEntity<String> handleFileUpload(@RequestParam("file") MultipartFile file) {
-        String result = fileProcessingService.processFile(file);
-        return ResponseEntity.ok(result);
+        try {
+            String result = fileProcessingService.processFile(file);
+            return ResponseEntity.ok(result);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(500).body("Error processing file: " + e.getMessage());
+        }
     }
 }
