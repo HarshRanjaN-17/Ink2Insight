@@ -48,6 +48,12 @@
     font-size: 0.95rem;
 }
 
+.loading-message {
+    color: #007bff;
+    font-weight: bold;
+    margin-top: 1rem;
+}
+
 body {
     background-color: #cbf0f0;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;

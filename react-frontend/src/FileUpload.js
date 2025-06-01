@@ -4,6 +4,7 @@ import './FileUpload.css';
 const FileUpload = () => {
     const [file, setFile] = useState(null);
     const [response, setResponse] = useState("");
+    const [loading, setLoading] = useState(false);
 
     const handleFileChange = (e) => {
         setFile(e.target.files[0]);
@@ -19,6 +20,8 @@ const FileUpload = () => {
         const formData = new FormData();
         formData.append("file", file);
 
+        setLoading(true);
+
         try {
             const res = await fetch("http://localhost:8080/api/upload", {
                 method: "POST",
@@ -30,6 +33,8 @@ const FileUpload = () => {
         } catch (err) {
             console.error(err);
             setResponse("Upload failed! Please try again.");
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -48,9 +53,13 @@ const FileUpload = () => {
             />
 
             <br />
-            <button onClick={handleUpload} className="upload-button">🚀 Upload</button>
+            <button onClick={handleUpload} className="upload-button" disabled={loading}>
+                {loading ? "Uploading..." : "🚀 Upload"}
+            </button>
 
-            {response && (
+            {loading && <p className="loading-message">⏳ Processing with AI...</p>}
+
+            {response && !loading && (
                 <div className="upload-response">
                     <strong>📝 Server Response:</strong>
                     <p>{response}</p>

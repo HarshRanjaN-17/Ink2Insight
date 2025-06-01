@@ -1,5 +1,6 @@
 package com.ink2insight.springbootbackend.service;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -9,6 +10,9 @@ import com.ink2insight.springbootbackend.utils.*;
 
 @Service
 public class FileProcessingService {
+    @Autowired
+    private AiExtractorService aiExtractorService;
+
     public String processFile(MultipartFile file) throws IOException {
         String filename = file.getOriginalFilename();
         String text = "";
@@ -19,6 +23,9 @@ public class FileProcessingService {
             text = ImageTextExtractor.extractText(file);
         }
 
-        return text;
+        // System.out.println("______EXTRACTED____" + text);
+        String aiExtractedText = aiExtractorService.processWithOllama(text);
+        // System.out.println(":::" + aiExtractedText);
+        return aiExtractedText;
     }
 }
