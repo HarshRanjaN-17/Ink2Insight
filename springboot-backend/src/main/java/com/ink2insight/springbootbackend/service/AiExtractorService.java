@@ -5,7 +5,6 @@ import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
 import java.util.Map;
-// import java.time.Duration;
 
 @Service
 public class AiExtractorService {
@@ -13,10 +12,12 @@ public class AiExtractorService {
     private final WebClient webClient = WebClient.create("http://localhost:11434");
 
     public String processWithOllama(String extractedText) {
-        String prompt = "Extract structured information from the following text. Respond only in valid, compact JSON format with a single object containing the following keys: "
-                + "employee_id, employee_name, email, mobile_no, patient_name, age, gender, relationship, details_of_illness, treating_doctor_name, hospital_name, hospital_address, "
-                + "treatment_start_date, treatment_end_date, bill_amount, bill_number, bill_date, remarks."
-                + " Do not include markdown or extra explanation. If a field is not found, leave it null. Here is the text:\n\n"
+
+        String prompt = "Extract only the following fields in a valid JSON format and stop: "
+                + "employee_id, employee_name, email, mobile_no, patient_name, age, gender, relationship, details_of_illness, "
+                + "treating_doctor_name, hospital_name, hospital_address, treatment_start_date, treatment_end_date, bill_amount, "
+                + "bill_number, bill_date, remarks. Do not generate anything beyond the JSON. DO NOT add explanations, metadata, or tokens. "
+                + "Do not include any additional text or formatting. Here is the text:\n\n"
                 + extractedText;
 
         return webClient.post()
@@ -43,11 +44,18 @@ public class AiExtractorService {
 
             if (start > 10 && end > start) {
                 String raw = fullJson.substring(start, end);
-                raw = raw.replace("\\n", "")
+                raw = raw
+                        .replace("\\n", "")
                         .replace("\\\"", "\"")
                         .replace("```json", "")
                         .replace("```", "")
                         .trim();
+
+                int jsonStart = raw.indexOf('{');
+                int jsonEnd = raw.lastIndexOf('}');
+                if (jsonStart != -1 && jsonEnd != -1 && jsonEnd > jsonStart) {
+                    return raw.substring(jsonStart, jsonEnd + 1).trim();
+                }
                 return raw;
             }
         } catch (Exception e) {
